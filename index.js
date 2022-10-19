@@ -2,7 +2,17 @@
 const tool = require("hachiware_tool");
 const cluster = require("cluster");
 
-module.exports = function(){
+module.exports = function(conf){
+
+    if(conf){
+        if(!conf.caches){
+            conf.caches = {};
+        }
+    
+        if(!conf.caches.name){
+            conf.caches.name = conf.hash;
+        }    
+    }
 
     var kerneled = false;
     var __mCache = {};
@@ -29,27 +39,41 @@ module.exports = function(){
             var value = null;
     
             if(data.mode == "set"){
-                __mCache[data.field] = data.value;
+                if(!__mCache[data.cacheName]){
+                    __mCache[data.cacheName] = {};
+                }
+
+                __mCache[data.cacheName][data.field] = data.value;
             }
             else if(data.mode == "get"){
                 if(data.field){
-                    if(__mCache[data.field]){
-                        value = __mCache[data.field];
-                    }    
+                    if(__mCache[data.cacheName]){
+                        if(__mCache[data.cacheName][data.field]){
+                            value = __mCache[data.cacheName][data.field];
+                        }
+                    }
                 }
                 else{
-                    value = __mCache;
+                    if(__mCache[data.cacheName]){
+                        value = __mCache[data.cacheName];
+                    }
                 }
             }
             else if(data.mode == "exists"){
                 value = false;
-                if(__mCache[data.field] !== undefined){
-                    value = true;
+
+                if(__mCache[data.cacheName]){
+                    if(__mCache[data.cacheName][data.field] !== undefined){
+                        value = true;
+                    }
                 }
             }
             else if(data.mode == "delete"){
-                if(__mCache[data.field]){
-                    delete __mCache[data.field];
+
+                if(__mCache[data.cacheName]){
+                    if(__mCache[data.cacheName][data.field]){
+                        delete __mCache[data.cacheName][data.field];
+                    }
                 }
             }
     
@@ -102,6 +126,7 @@ module.exports = function(){
 
         process.send({
             mode: "set",
+            cacheName: conf.caches.name,
             field: field,
             value: value,
             callbackKey: ckey,
@@ -122,6 +147,7 @@ module.exports = function(){
 
         process.send({
             mode: "get",
+            cacheName: conf.caches.name,
             field: field,
             callbackKey:ckey,
         });
@@ -141,6 +167,7 @@ module.exports = function(){
 
         process.send({
             mode: "exists",
+            cacheName: conf.caches.name,
             field: field,
             callbackKey:ckey,
         });
@@ -159,6 +186,7 @@ module.exports = function(){
 
         process.send({
             mode: "delete",
+            cacheName: conf.caches.name,
             field: field,
             callbackKey:ckey,
         });
