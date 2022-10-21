@@ -29,7 +29,7 @@ module.exports = function(conf){
      * fookBegin
      */
     this.fookBegin = function(){
-
+            
         cluster.on("message", function(c_, data){
         
             if(!data){
@@ -204,18 +204,51 @@ module.exports = function(conf){
 
         const cache = function(){
 
+            /**
+             * begin
+             * @returns 
+             */
+            this.begin = function(){
+                return vm.fookBegin();
+            };
+
+            /**
+             * set
+             * @param {*} field 
+             * @param {*} value 
+             * @param {*} callback 
+             * @returns 
+             */
             this.set = function(field, value, callback){
                 return vm.set(field, value, callback);
             };
 
+            /**
+             * get
+             * @param {*} field 
+             * @param {*} callback 
+             * @returns 
+             */
             this.get = function(field, callback){
                 return vm.get(field, callback);
             };
 
+            /**
+             * delete
+             * @param {*} field 
+             * @param {*} callback 
+             * @returns 
+             */
             this.delete = function(field, callback){
                 return vm.delete(field, callback);
             };
 
+            /**
+             * exists
+             * @param {*} field 
+             * @param {*} callback 
+             * @returns 
+             */
             this.exists = function(field, callback){
                 return vm.exists(field, callback);
             };
